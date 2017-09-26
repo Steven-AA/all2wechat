@@ -175,7 +175,8 @@ def record():
             'base_uri': base_uri,
             'pass_ticket':pass_ticket,
             'BaseRequest': BaseRequest,
-            'My':My
+            'My':My,
+            'ContactList':ContactList
         }
         f.write(str(dic))
         print('Login finish')
@@ -192,6 +193,7 @@ def main():
         return
     if not webwxinit():
         print('Init failed')
+    webwxgetcontact()
     record()
 
 
