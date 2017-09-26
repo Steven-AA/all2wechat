@@ -41,8 +41,8 @@ def webwxsendmsg(friend, content):
     resp = json.loads(r.text)
     if 'BaseResponse' in resp:
         if 'Ret' in resp['BaseResponse']:
-            return int(resp['BaseResponse']['Ret'])
-    return -1
+            return True
+    return False
 
 
 if __name__ == '__main__':
