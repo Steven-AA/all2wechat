@@ -38,7 +38,7 @@ def init():
             dic = eval(dic)
     except:
         if 'linux' in platform:
-            path = '~/all2wechat/logininfo.log'
+            path = '/home/steven/all2wechat/logininfo.log'
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path,'r') as f:
