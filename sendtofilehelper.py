@@ -21,20 +21,25 @@ def webwxsendmsgtome(content):
     data = json.dumps(payload, ensure_ascii=False)
 
     r = s.post(url, data=data, headers=headers)
-
+    time.sleep(1)
     resp = json.loads(r.text)
     if 'BaseResponse' in resp:
         if 'Ret' in resp['BaseResponse']:
-            return int(resp['BaseResponse']['Ret'])
+            return True
     return False
 
 def init():
     global dic
-    with open("./logininfo.log",'r') as f:
-        print(f.readline())
-        dic = f.readline()
-        dic = eval(dic)
-
+    try:
+        with open("./logininfo.log",'r') as f:
+            print(f.readline())
+            dic = f.readline()
+            dic = eval(dic)
+    except:
+        with open("E:/Github/all2wechat/logininfo.log",'r') as f:
+            print(f.readline())
+            dic = f.readline()
+            dic = eval(dic)
 init()
 
 def main():
