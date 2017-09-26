@@ -1,5 +1,6 @@
 import json
 import time
+from sys import platform
 from loggin import s
 
 dic = ''
@@ -36,7 +37,11 @@ def init():
             dic = f.readline()
             dic = eval(dic)
     except:
-        with open("E:/Github/all2wechat/logininfo.log",'r') as f:
+        if 'linux' in platform:
+            path = '~/all2wechat/logininfo.log'
+        else:
+            path = 'E:/Github/all2wechat/logininfo.log'
+        with open(path,'r') as f:
             print(f.readline())
             dic = f.readline()
             dic = eval(dic)
