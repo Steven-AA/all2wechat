@@ -30,18 +30,18 @@ def main():
         # todo
         pass
     else:
-        launch_str = 'powershell.exe -Command ' + args.cmd
+        launch_str = args.cmd
         p = Popen(launch_str, stdout=PIPE, stderr=STDOUT, shell=True)
     flag = True
     while True:
         line = p.stdout.readline()
-        print(line)
         if not line:
             break
         if args.re != None or args.mode != None:
             try:
                 line = patten.findall(line)[0]
             except:
+                print("not sending:\t" + line)
                 continue
         if args.user != None:
             if not webwxsendmsg(friend, line):
