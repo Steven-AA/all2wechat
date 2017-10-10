@@ -52,15 +52,14 @@ def init():
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
-            print(f.readline())
+            print(time.ctime() + '\tlogin info time:' +
+                  f.readline()[:-1])
             dic = f.readline()
             dic = eval(dic)
 
 
-init()
-
-
 def main():
+    init()
     webwxsendmsgtome("hello")
 
 

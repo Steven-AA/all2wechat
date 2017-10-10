@@ -7,12 +7,17 @@ import time
 import urllib
 import xml.dom.minidom
 from sys import platform
+import argparse
 
 import requests
 from termcolor import colored
 
 import sendtofilehelper
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--scl', '-s', help='sync contactlist',
+                    const=True, default=False, type=bool, nargs='?')
+args = parser.parse_args()
 LOGGINURL = "https://wx.qq.com/"
 UUID = ''
 redirect_uri = ''
@@ -64,7 +69,7 @@ def login():
         p = re.compile('window.code=(...)')
         code = p.match(text).group(1)
         if code == '200':
-            print('Log in success')
+            print(time.ctime() + '\tLog in success')
             # print text
             # window.redirect_uri="https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=AxNVJPVI0qe7OUFhvGSbT73N@qrticket_0&uuid=wZePRtQbgw==&lang=zh_CN&scan=1506394610";
             p = re.compile('window.redirect_uri="(.*)";')
@@ -134,11 +139,15 @@ def webwxinit():
 
 def webwxgetcontact():
     global ContactList
+    print(time.ctime() + '\tGetting contactlist')
     url = base_uri + "/webwxgetcontact?r=" + str(int(
         time.time()))
     r = s.post(url, json={})
     content = r.text.encode('unicode_escape').decode('string_escape')
     ContactList = json.loads(content)['MemberList']
+    with open('contactlist.log', 'w') as f:
+        f.write(str(ContactList))
+    print(time.ctime() + '\tContactlist get')
 
 
 def striphtml(data):
@@ -162,7 +171,7 @@ def _try(fun, times=5, failmessage=None, successmessage=None):
                 print('Fail {} time(s)'.format(i + 1))
             time.sleep(1)
         else:
-            print(successmessage)
+            print(time.ctime() + '\t' + successmessage)
             return True
     return False
 
@@ -177,35 +186,35 @@ def record():
             'pass_ticket': pass_ticket,
             'BaseRequest': BaseRequest,
             'My': My,
-            'ContactList': ContactList
         }
         f.write(str(dic))
-        print('Login finish')
+        print(time.ctime() + '\tLogin finish')
 
 
 def keep_login():
     sendtofilehelper.init()
     while 1:
         if sendtofilehelper.webwxsendmsgtome("hello"):
-            print('Sended')
+            print(time.ctime() + '\tSended')
         else:
-            print('Failed')
-        time.sleep(60)
+            print(time.ctime() + '\tFailed')
+        time.sleep(300)
 
 
 def main():
-    print('Getting UUID ...')
+    print(time.ctime() + '\tGetting UUID ...')
     if not _try(get_uuid, successmessage='UUID get'):
         return
-    print('Getting QRcode ...')
+    print(time.ctime() + '\tGetting QRcode ...')
     get_QRcode()
-    print('QRcode get')
+    print(time.ctime() + '\tQRcode get')
     if not login():
-        print('Login failed')
+        print(time.ctime() + '\tLogin failed')
         return
     if not webwxinit():
-        print('Init failed')
-    webwxgetcontact()
+        print(time.ctime() + '\tInit failed')
+    if args.scl:
+        webwxgetcontact()
     record()
     keep_login()
 
