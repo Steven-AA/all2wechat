@@ -11,6 +11,8 @@ from sys import platform
 import requests
 from termcolor import colored
 
+import sendtofilehelper
+
 LOGGINURL = "https://wx.qq.com/"
 UUID = ''
 redirect_uri = ''
@@ -139,8 +141,6 @@ def webwxgetcontact():
     ContactList = json.loads(content)['MemberList']
 
 
-
-
 def striphtml(data):
     p = re.compile(r'<.*?>')
     return p.sub('', data)
@@ -166,20 +166,32 @@ def _try(fun, times=5, failmessage=None, successmessage=None):
             return True
     return False
 
+
 def record():
     with open("logininfo.log", 'w') as f:
-        f.write(time.ctime()+'\n')
+        f.write(time.ctime() + '\n')
         dic = {
             'UUID': UUID,
             'redirect_uri': redirect_uri,
             'base_uri': base_uri,
-            'pass_ticket':pass_ticket,
+            'pass_ticket': pass_ticket,
             'BaseRequest': BaseRequest,
-            'My':My,
-            'ContactList':ContactList
+            'My': My,
+            'ContactList': ContactList
         }
         f.write(str(dic))
         print('Login finish')
+
+
+def keep_login():
+    sendtofilehelper.init()
+    while 1:
+        if sendtofilehelper.webwxsendmsgtome("hello"):
+            print('Sended')
+        else:
+            print('Failed')
+        time.sleep(60)
+
 
 def main():
     print('Getting UUID ...')
@@ -195,6 +207,7 @@ def main():
         print('Init failed')
     webwxgetcontact()
     record()
+    keep_login()
 
 
 if __name__ == '__main__':

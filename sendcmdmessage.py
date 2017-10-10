@@ -41,7 +41,7 @@ def main():
             try:
                 line = patten.findall(line)[0]
             except:
-                print("not sending:\t" + line)
+                print("Ignore:\t" + line)
                 continue
         if args.user != None:
             if not webwxsendmsg(friend, line):

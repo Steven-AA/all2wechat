@@ -1,13 +1,22 @@
 import json
 import time
 from sys import platform
-from loggin import s
+
+import requests
+
+s = requests.Session()
+s.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+    'Connection': 'keep-alive',
+    'Content-type': 'text/html; charset=utf-8'})
 
 dic = ''
 
+
 def webwxsendmsgtome(content):
     clientMsgId = str(int(time.time()))
-    url = dic['base_uri'] + "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
+    url = dic['base_uri'] + \
+        "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
     Msg = {
         'Type': '1',
         'Content': content,
@@ -29,10 +38,11 @@ def webwxsendmsgtome(content):
             return True
     return False
 
+
 def init():
     global dic
     try:
-        with open("./logininfo.log",'r') as f:
+        with open("./logininfo.log", 'r') as f:
             print(f.readline())
             dic = f.readline()
             dic = eval(dic)
@@ -41,14 +51,18 @@ def init():
             path = '/home/steven/all2wechat/logininfo.log'
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
-        with open(path,'r') as f:
+        with open(path, 'r') as f:
             print(f.readline())
             dic = f.readline()
             dic = eval(dic)
+
+
 init()
+
 
 def main():
     webwxsendmsgtome("hello")
+
 
 if __name__ == '__main__':
     main()
