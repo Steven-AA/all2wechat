@@ -43,7 +43,8 @@ def init():
     global dic
     try:
         with open("./logininfo.log", 'r') as f:
-            print(f.readline())
+            print(time.ctime() + '\tlogin info time:\t' +
+                  f.readline()[:-1])
             dic = f.readline()
             dic = eval(dic)
     except:
@@ -52,7 +53,7 @@ def init():
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
-            print(time.ctime() + '\tlogin info time:' +
+            print(time.ctime() + '\tlogin info time:\t' +
                   f.readline()[:-1])
             dic = f.readline()
             dic = eval(dic)
