@@ -4,6 +4,7 @@ from sys import platform
 
 import requests
 
+
 s = requests.Session()
 s.headers.update({
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
@@ -43,8 +44,8 @@ def init():
     global dic
     try:
         with open("./logininfo.log", 'r') as f:
-            print(time.ctime() + '\tlogin info time:\t' +
-                  f.readline()[:-1])
+            _print('login info time:\t' +
+                   f.readline()[:-1])
             dic = f.readline()
             dic = eval(dic)
     except:
@@ -53,8 +54,8 @@ def init():
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
-            print(time.ctime() + '\tlogin info time:\t' +
-                  f.readline()[:-1])
+            _print('login info time:\t' +
+                   f.readline()[:-1])
             dic = f.readline()
             dic = eval(dic)
 

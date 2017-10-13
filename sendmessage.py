@@ -1,7 +1,7 @@
 from sendtofilehelper import dic
 import sys
 import time
-from loggin import s
+from login import s
 import json
 
 
@@ -12,17 +12,20 @@ def webwxgetcontact():
     content = r.text.encode('unicode_escape').decode('string_escape')
     ContactList = json.loads(content)['MemberList']
 
+
 def main():
     name = sys.argv[1].decode('gbk')
     for f in dic['ContactList']:
         if f['RemarkName'] == name or f['NickName'] == name:
             webwxsendmsg(f, sys.argv[2].decode('gbk').encode('utf8'))
             print('Send')
-            break;
+            break
+
 
 def webwxsendmsg(friend, content):
     clientMsgId = str(int(time.time()))
-    url = dic['base_uri'] + "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
+    url = dic['base_uri'] + \
+        "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
     Msg = {
         'Type': '1',
         'Content': content,
