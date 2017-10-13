@@ -1,8 +1,8 @@
-from sendtofilehelper import dic
+import json
 import sys
 import time
-from login import s
-import json
+
+from login import dic, s
 
 
 def webwxgetcontact():

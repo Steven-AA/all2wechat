@@ -13,11 +13,6 @@ import requests
 from termcolor import colored
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--scl', '-s', help='sync contactlist',
-                    const=True, default=False, type=bool, nargs='?')
-
-args = parser.parse_args()
 LOGGINURL = "https://wx.qq.com/"
 BaseRequest = {}
 deviceId = 'e000000000000000'
@@ -238,28 +233,42 @@ def init():
             dic = eval(dic)
 
 
+def new_login():
+    _print('Getting UUID ...')
+    if not _try(get_uuid, successmessage='UUID get'):
+        return
+    _print('Getting QRcode ...')
+    get_QRcode()
+    _print('QRcode get')
+    if not login():
+        _print('Login failed')
+        return
+    if not webwxinit():
+        _print('Init failed')
+    record()
+
+
 def main():
-    _print('Trying to use last login info ...')
-    init()
-    if webwxsendmsgtome('hello'):
-        _print('Success')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--scl', '-s', help='sync contactlist',
+                        const=True, default=False, type=bool, nargs='?')
+    parser.add_argument('--recent', '-r', help='auto login with recent info',
+                        default=False, type=bool, const=True, nargs='?')
+    args = parser.parse_args()
+    if args.recent:
+        _print('Trying to use last login info ...')
+        try:
+            init()
+            if webwxsendmsgtome('hello'):
+                _print('Success')
+        except:
+            new_login()
     else:
-        _print('Failed')
-        _print('Getting UUID ...')
-        if not _try(get_uuid, successmessage='UUID get'):
-            return
-        _print('Getting QRcode ...')
-        get_QRcode()
-        _print('QRcode get')
-        if not login():
-            _print('Login failed')
-            return
-        if not webwxinit():
-            _print('Init failed')
-        if args.scl:
-            _print('Syncing contactlist')
-            webwxgetcontact()
-        record()
+        new_login()
+    if args.scl:
+        _print('Syncing contactlist')
+        webwxgetcontact()
+        _print('done')
     keep_login()
 
 
