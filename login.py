@@ -205,7 +205,7 @@ def webwxsendmsgtome(content):
     data = json.dumps(payload, ensure_ascii=False)
 
     r = s.post(url, data=data, headers=headers)
-    time.sleep(1)
+    # time.sleep(1)
     resp = json.loads(r.text)
     if 'BaseResponse' in resp:
         if 'Ret' in resp['BaseResponse']:

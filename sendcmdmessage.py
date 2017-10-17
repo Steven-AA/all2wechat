@@ -2,6 +2,8 @@ import argparse
 import re
 import sys
 from subprocess import PIPE, STDOUT, Popen
+import threading
+import Queue
 
 from login import _print, webwxsendmsgtome, dic, init
 from sendmessage import webwxsendmsg
@@ -9,6 +11,30 @@ from sendmessage import webwxsendmsg
 
 mode = {'p': '([0-9]+%)|Done'}
 powershell = 'C:\Windows.old\WINDOWS\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+
+
+class run_subprocess(threading.Thread):
+    def __init__(self, cmd):
+        threading.Thread.__init__(self)
+        self.cmd = cmd
+
+    def run(self):
+        global q
+        launch_str = self.cmd
+        p = Popen(launch_str, stdout=PIPE, stderr=STDOUT, shell=True)
+        _print('Running ' + launch_str)
+        while True:
+            line = p.stdout.readline()
+            if not line:
+                break
+            if not q.full():
+                q.put(line)
+            else:
+                q.get()
+                q.put(line)
+
+
+q = Queue.Queue(100)
 
 
 def main():
@@ -34,15 +60,15 @@ def main():
         # todo
         pass
     else:
-        launch_str = args.cmd
-        p = Popen(launch_str, stdout=PIPE, stderr=STDOUT, shell=True)
-        _print('Running ' + launch_str)
+        thread_subprocess = run_subprocess(args.cmd)
+        thread_subprocess.start()
     flag = True
+    _print('start to send')
     while True:
+        if q.empty():
+            continue
+        line = q.get()
         try:
-            line = p.stdout.readline()
-            if not line:
-                break
             if args.re != None or args.mode != None:
                 try:
                     line = patten.findall(line)[0]
