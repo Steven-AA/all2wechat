@@ -4,6 +4,7 @@ import sys
 from subprocess import PIPE, STDOUT, Popen
 import threading
 import Queue
+import time
 
 from login import _print, webwxsendmsgtome, dic, init
 from sendmessage import webwxsendmsg
