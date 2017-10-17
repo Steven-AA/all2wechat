@@ -66,6 +66,7 @@ def main():
     _print('start to send')
     while True:
         if q.empty():
+            time.sleep(1)
             continue
         line = q.get()
         try:
