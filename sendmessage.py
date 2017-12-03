@@ -1,25 +1,77 @@
 import json
 import sys
 import time
+from sys import platform
 
-from login import dic, s
+from login import s, _print
 
+dic = {}
+
+
+
+def init():
+    global dic
+    try:
+        with open("./logininfo.log", 'r') as f:
+            _print('login info time:\t' +
+                   f.readline()[:-1])
+            dic = f.readline()
+            dic = eval(dic)
+    except:
+        if 'linux' in platform:
+            path = '/home/stevi/all2wechat/logininfo.log'
+        else:
+            path = 'E:/Github/all2wechat/logininfo.log'
+        with open(path, 'r') as f:
+            _print('login info time:\t' +
+                   f.readline()[:-1])
+            dic = f.readline()
+            dic = eval(dic)
 
 def webwxgetcontact():
-    url = dic['base_uri'] + "/webwxgetcontact?r=" + str(int(
-        time.time()))
-    r = s.post(url, json={})
-    content = r.text.encode('unicode_escape').decode('string_escape')
-    ContactList = json.loads(content)['MemberList']
+    global dic
+    try:
+        with open("./contactlist.log", 'r') as f:
+            ContactList = f.readline()
+            ContactList = eval(ContactList)
+            dic['ContactList'] = ContactList
+    except:
+        pass
+        #todo
+        if 'linux' in platform:
+            path = '/home/stevi/all2wechat/logininfo.log'
+        else:
+            path = 'E:/Github/all2wechat/logininfo.log'
+        with open(path, 'r') as f:
+            _print('loading login data from '+path)
+            _print('login info time:\t' +
+                   f.readline()[:-1])
+            dic = f.readline()
+            dic = eval(dic)
+#    _print('Getting contactlist')
+#    url = dic['base_uri'] + "/webwxgetcontact?r=" + str(int(
+#        time.time()))
+#    r = s.post(url, json={})
+#    content = r.text.encode('unicode_escape').decode('string_escape')
+#    ContactList = json.loads(content)['MemberList']
+#    dic['ContactList'] = ContactList
+#    with open('contactlist.log', 'w') as f:
+#        f.write(str(ContactList))
+#    _print('Contactlist get')
 
+    
 
 def main():
-    name = sys.argv[1].decode('gbk')
+    global dic
+    init()
+    webwxgetcontact()
+    name = sys.argv[1].decode('utf8')
     for f in dic['ContactList']:
         if f['RemarkName'] == name or f['NickName'] == name:
-            webwxsendmsg(f, sys.argv[2].decode('gbk').encode('utf8'))
+            webwxsendmsg(f, sys.argv[2])
             print('Send')
             break
+
 
 
 def webwxsendmsg(friend, content):

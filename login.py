@@ -8,13 +8,15 @@ import urllib
 import xml.dom.minidom
 from sys import platform
 import argparse
+import pyqrcode
 
 import requests
 from termcolor import colored
 
 
 LOGGINURL = "https://wx.qq.com/"
-BaseRequest = {}
+
+Request = {}
 deviceId = 'e000000000000000'
 
 My = {}
@@ -29,12 +31,14 @@ s.headers.update({
     'Connection': 'keep-alive',
     'Content-type': 'text/html; charset=utf-8'})
 
+qr_terminal = ''
 
 def get_uuid():
     global dic
     url = 'https://login.wx.qq.com/jslogin?appid=wx782c26e4c19acffb&redirect_uri=https%3A%2F%2Fwx.qq.com%2Fcgi-bin%2Fmmwebwx-bin%2Fwebwxnewloginpage&fun=new&lang=zh_CN&_=' + \
         str(int(time.time()))
     text = s.get(url).text
+
     p1 = re.compile(
         'window.QRLogin.code = (...); window.QRLogin.uuid = "(.{12})";')
     match = p1.match(text)
@@ -49,7 +53,8 @@ def get_uuid():
 def login():
     global dic
     if 'linux' in platform:
-        os.system('eog QRcode.jpg')
+#        os.system('eog QRcode.jpg')
+        print(qr_terminal)
     else:
         os.system('QRcode.jpg')
     while True:
@@ -130,13 +135,14 @@ def webwxinit():
 
 
 def webwxgetcontact():
-    global ContactList
+    global ContactList, dic
     _print('Getting contactlist')
     url = dic['base_uri'] + "/webwxgetcontact?r=" + str(int(
         time.time()))
     r = s.post(url, json={})
     content = r.text.encode('unicode_escape').decode('string_escape')
     ContactList = json.loads(content)['MemberList']
+    dic['ContactList'] = ContactList
     with open('contactlist.log', 'w') as f:
         f.write(str(ContactList))
     _print('Contactlist get')
@@ -148,8 +154,12 @@ def striphtml(data):
 
 
 def get_QRcode():
-    url = "https://login.weixin.qq.com/qrcode/" + dic['UUID']
-    urllib.urlretrieve(url, 'QRcode.jpg')
+    global qr_terminal
+    url = "https://login.weixin.qq.com/l/" + dic['UUID']
+    # urllib.request.urlretrieve(url, 'QRcode.jpg')
+    qr = pyqrcode.create(url)
+    qr.png('QRcode.jpg', scale=8)
+    qr_terminal = qr.terminal(quiet_zone=1)
 
 
 def _try(fun, times=5, failmessage=None, successmessage=None):
@@ -223,7 +233,7 @@ def init():
             dic = eval(dic)
     except:
         if 'linux' in platform:
-            path = '/home/steven/all2wechat/logininfo.log'
+            path = '/home/stevi/all2wechat/logininfo.log'
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
@@ -245,6 +255,7 @@ def new_login():
         return
     if not webwxinit():
         _print('Init failed')
+    dic['webwx_data_ticket'] = s.cookies['webwx_data_ticket']
     record()
 
 
