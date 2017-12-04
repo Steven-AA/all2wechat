@@ -27,9 +27,9 @@ dic = {}
 
 s = requests.Session()
 s.headers.update({
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
-    'Connection': 'keep-alive',
-    'Content-type': 'text/html; charset=utf-8'})
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'})
+    # 'Connection': 'keep-alive',
+    # 'Content-type': 'text/html; charset=utf-8'})
 
 qr_terminal = ''
 
@@ -53,7 +53,7 @@ def get_uuid():
 def login():
     global dic
     if 'linux' in platform:
-#        os.system('eog QRcode.jpg')
+        #        os.system('eog QRcode.jpg')
         print(qr_terminal)
     else:
         os.system('QRcode.jpg')

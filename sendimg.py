@@ -19,14 +19,12 @@ dic = {}
 file_index = 0
 
 
-
 def upload_media(fpath, is_img=False):
     global file_index
     if not os.path.exists(fpath):
         _print('File not exists')
         return None
-    url_1 = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
-    url_2 = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
+    url = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
     flen = str(os.path.getsize(fpath))
     ftype = mimetypes.guess_type(fpath)[0] or 'application/octet-stream'
     files = {
@@ -46,51 +44,53 @@ def upload_media(fpath, is_img=False):
         })),
         'webwx_data_ticket': (None, dic['webwx_data_ticket']),
         'pass_ticket': (None, dic['pass_ticket']),
-        'filename': (os.path.basename(fpath), open(fpath, 'rb'),ftype.split('/')[1]),
+        'filename': (os.path.basename(fpath), open(fpath, 'rb'), ftype.split('/')[1]),
     }
     file_index += 1
     try:
-        r = s.post(url_1, files=files)
+        r = s.post(url, files=files)
         if json.loads(r.text)['BaseResponse']['Ret'] != 0:
-            r = s.post(url_2, files=files)
+            r = s.post(url, files=files)
             if json.loads(r.text)['BaseResponse']['Ret'] != 0:
                 _print('Upload media failure.')
                 return None
-            mid = json.loads(r.text)['MediaId']
-            return mid
-    except Exception,e:
+        mid = json.loads(r.text)['MediaId']
+        return mid
+    except Exception, e:
         print(e)
         return None
 
+
 def send_img(fpath, friend):
-        mid = upload_media(fpath, is_img=True)
-        if mid is None:
+    mid = upload_media(fpath, is_img=True)
+    if mid is None:
+        return False
+    url = dic['base_uri'] + '/webwxsendmsgimg?fun=async&f=json'
+    data = {
+        'BaseRequest': dic['BaseRequest'],
+        'Msg': {
+            'Type': 3,
+            'MediaId': mid,
+            'FromUserName': dic['My']['UserName'],
+            'ToUserName': friend["UserName"].encode('unicode_escape'),
+            'LocalID': str(time.time() * 1e7),
+            'ClientMsgId': str(time.time() * 1e7), }, }
+    if fpath[-4:] == '.gif':
+        url = dic['base_uri'] + '/webwxsendemoticon?fun=sys'
+        data['Msg']['Type'] = 47
+        data['Msg']['EmojiFlag'] = 2
+    try:
+        r = s.post(url, data=json.dumps(data))
+        res = json.loads(r.text)
+        if res['BaseResponse']['Ret'] == 0:
+            return True
+        else:
+            print(res)
             return False
-        url = dic['base_uri'] + '/webwxsendmsgimg?fun=async&f=json'
-        data = {
-                'BaseRequest': self.base_request,
-                'Msg': {
-                    'Type': 3,
-                    'MediaId': mid,
-                    'FromUserName': dic['My']['UserName'],
-                    'ToUserName': friend["UserName"].encode('unicode_escape'),
-                    'LocalID': str(time.time() * 1e7),
-                    'ClientMsgId': str(time.time() * 1e7), }, }
-        if fpath[-4:] == '.gif':
-            url = dic['base_uri'] + '/webwxsendemoticon?fun=sys'
-            data['Msg']['Type'] = 47
-            data['Msg']['EmojiFlag'] = 2
-        try:
-            r = s.post(url, data=json.dumps(data))
-            res = json.loads(r.text)
-            if res['BaseResponse']['Ret'] == 0:
-                return True
-            else:
-                return False
-        except Exception,e:
-            print(e)
-            return False
-        
+    except Exception, e:
+        print(e)
+        return False
+
 
 def init():
     global dic
@@ -111,6 +111,7 @@ def init():
             dic = f.readline()
             dic = eval(dic)
 
+
 def webwxgetcontact():
     global dic
     try:
@@ -120,13 +121,13 @@ def webwxgetcontact():
             dic['ContactList'] = ContactList
     except:
         pass
-        #todo
+        # todo
         if 'linux' in platform:
             path = '/home/stevi/all2wechat/logininfo.log'
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
-            _print('loading login data from '+path)
+            _print('loading login data from ' + path)
             _print('login info time:\t' +
                    f.readline()[:-1])
             dic = f.readline()
@@ -142,25 +143,27 @@ def webwxgetcontact():
 #        f.write(str(ContactList))
 #    _print('Contactlist get')
 
-    
 
 def main():
     global dic
     init()
     webwxgetcontact()
-    name = sys.argv[1].decode('utf8')
+    try:
+        name = sys.argv[1].decode('utf8')
+    except:
+        name = sys.argv[1].decode('gbk')
     for f in dic['ContactList']:
         if f['RemarkName'] == name or f['NickName'] == name:
-            if send_img('./image/ScreenClip.png', f):
-#             webwxsendmsg(f, sys.argv[2])
+            if send_img('D:/workspace/Python/Falldetect/Data/pic/1/1_frame_0.jpg', f):
+                #             webwxsendmsg(f, sys.argv[2])
                 print('Send')
             break
 
 
-
 def webwxsendmsg(friend, content):
     clientMsgId = str(int(time.time()))
-    url = dic['base_uri'] +         "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
+    url = dic['base_uri'] + \
+        "/webwxsendmsg?lang=zh_CN&pass_ticket=" + dic['pass_ticket']
     Msg = {
         'Type': '1',
         'Content': content,
@@ -185,4 +188,3 @@ def webwxsendmsg(friend, content):
 
 if __name__ == '__main__':
     main()
-
