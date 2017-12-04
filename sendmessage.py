@@ -8,7 +8,6 @@ from login import s, _print
 dic = {}
 
 
-
 def init():
     global dic
     try:
@@ -28,6 +27,7 @@ def init():
             dic = f.readline()
             dic = eval(dic)
 
+
 def webwxgetcontact():
     global dic
     try:
@@ -37,13 +37,13 @@ def webwxgetcontact():
             dic['ContactList'] = ContactList
     except:
         pass
-        #todo
+        # todo
         if 'linux' in platform:
             path = '/home/stevi/all2wechat/logininfo.log'
         else:
             path = 'E:/Github/all2wechat/logininfo.log'
         with open(path, 'r') as f:
-            _print('loading login data from '+path)
+            _print('loading login data from ' + path)
             _print('login info time:\t' +
                    f.readline()[:-1])
             dic = f.readline()
@@ -59,19 +59,20 @@ def webwxgetcontact():
 #        f.write(str(ContactList))
 #    _print('Contactlist get')
 
-    
 
 def main():
     global dic
     init()
     webwxgetcontact()
-    name = sys.argv[1].decode('utf8')
+    try:
+        name = sys.argv[1].decode('utf8')
+    except:
+        name = sys.argv[1].decode('gbk')
     for f in dic['ContactList']:
         if f['RemarkName'] == name or f['NickName'] == name:
             webwxsendmsg(f, sys.argv[2])
             print('Send')
             break
-
 
 
 def webwxsendmsg(friend, content):
