@@ -10,6 +10,7 @@ import time
 import os
 import mimetypes
 from sys import platform
+import requests
 
 from login import s, _print
 
@@ -21,10 +22,14 @@ file_index = 0
 
 def upload_media(fpath, is_img=False):
     global file_index
+    url = 'http://file.api.wechat.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE'
+    files = {'media': open('test.jpg', 'rb')}
+    requests.post(url, files=files)
     if not os.path.exists(fpath):
         _print('File not exists')
         return None
-    url = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
+    url_1 = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
+    url_2 = 'https://file.wx2.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json'
     flen = str(os.path.getsize(fpath))
     ftype = mimetypes.guess_type(fpath)[0] or 'application/octet-stream'
     files = {
@@ -48,14 +53,14 @@ def upload_media(fpath, is_img=False):
     }
     file_index += 1
     try:
-        r = s.post(url, files=files)
+        r = s.post(url_1, files=files)
         if json.loads(r.text)['BaseResponse']['Ret'] != 0:
-            r = s.post(url, files=files)
+            r = s.post(url_2, files=files)
             if json.loads(r.text)['BaseResponse']['Ret'] != 0:
                 _print('Upload media failure.')
                 return None
-        mid = json.loads(r.text)['MediaId']
-        return mid
+            mid = json.loads(r.text)['MediaId']
+            return mid
     except Exception, e:
         print(e)
         return None
@@ -67,7 +72,7 @@ def send_img(fpath, friend):
         return False
     url = dic['base_uri'] + '/webwxsendmsgimg?fun=async&f=json'
     data = {
-        'BaseRequest': dic['BaseRequest'],
+        'BaseRequest': self.base_request,
         'Msg': {
             'Type': 3,
             'MediaId': mid,
@@ -75,17 +80,12 @@ def send_img(fpath, friend):
             'ToUserName': friend["UserName"].encode('unicode_escape'),
             'LocalID': str(time.time() * 1e7),
             'ClientMsgId': str(time.time() * 1e7), }, }
-    if fpath[-4:] == '.gif':
-        url = dic['base_uri'] + '/webwxsendemoticon?fun=sys'
-        data['Msg']['Type'] = 47
-        data['Msg']['EmojiFlag'] = 2
     try:
         r = s.post(url, data=json.dumps(data))
         res = json.loads(r.text)
         if res['BaseResponse']['Ret'] == 0:
             return True
         else:
-            print(res)
             return False
     except Exception, e:
         print(e)
@@ -154,7 +154,7 @@ def main():
         name = sys.argv[1].decode('gbk')
     for f in dic['ContactList']:
         if f['RemarkName'] == name or f['NickName'] == name:
-            if send_img('D:/workspace/Python/Falldetect/Data/pic/1/1_frame_0.jpg', f):
+            if send_img('./image/ScreenClip.png', f):
                 #             webwxsendmsg(f, sys.argv[2])
                 print('Send')
             break
